@@ -39,7 +39,7 @@ public class Problem {
     private void generateGraphs(){
         // Generate k cluster centers
         for(int i = 0; i < k; i++){
-            clusterCenters.add(Graph.random(n));
+            clusterCenters.add(Graph.randomDAG(n));
             // TODO: Ensure that the agony between these is sufficiently large
         }
         
@@ -66,11 +66,58 @@ public class Problem {
             Graph c = clusterCenters.get(i);
             
             for(int j = 0; j < partitionCounts[i]; j++){
-                Graph mod = c.clone();
+                Graph mod = modGraph(c, 5);
                 // modify this graph to induce some maximum agony
                 graphs.add(mod);
             }
         }
+    }
+    
+    /**
+     * Given a DAG, swap some edges and return a new graph that has at most
+     * maxAgony induced between it and the original graph
+     * The result is still a DAG
+     * @param g
+     * @param maxAgony
+     * @return
+     */
+    private static Graph modGraph(Graph g, int maxAgony){
+        // Swap random edges
+        Graph mod = g.clone();
+        // construct two permutations to iterate through the edge set in
+        List<Integer> p1 = orderedList(1, mod.nodes);
+        permute(p1);
+        List<Integer> p2 = orderedList(1, mod.nodes);
+        permute(p2);
+        
+        
+        maxAgony = RAND.nextInt(maxAgony) + 1; // ensure it is not zero agony
+        // Find some edges and remove them
+        for(int i : p1) {
+            for(int j : p2) {
+                if(mod.edges[i][j]) {
+                    if(maxAgony > 0) {
+                        mod.edges[i][j] = false;
+                        maxAgony--;
+                    }
+                }
+            }
+        }
+        
+        // Add some different edges back in until it is connected as long as
+        // it does not cause a cycle
+        while(!mod.isConneced()){
+            int i = RAND.nextInt(mod.nodes) + 1;
+            int j = RAND.nextInt(mod.nodes) + 1;
+            // Don't generate self loops or add edges that already exist
+            if(i != j && !mod.edges[i][j]){
+                mod.edges[i][j] = true;
+                if(!mod.isAcyclic()){
+                    mod.edges[i][j] = false;
+                }
+            }
+        }
+        return mod;
     }
     
     public void write(OutputStream output) throws IOException {
@@ -93,9 +140,33 @@ public class Problem {
         
         bw.close();
     }
-    
+
     public void writeFile(String filePath) throws IOException {
         write(new FileOutputStream(new File(filePath)));
+    }
+
+    // Write the cluster centers and the original partition map
+    public void writeKey(OutputStream output) throws IOException {
+        
+        BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(output));
+        // Write out all of the cluster centers
+        for(int i = 0; i < clusterCenters.size(); i++){
+            Graph g = clusterCenters.get(i);
+            g.write(bw);
+        }
+        bw.close();
+    }
+    
+    public void writeKeyFile(String filePath) throws IOException {
+        writeKey(new FileOutputStream(new File(filePath)));
+    }
+    
+    private static List<Integer> orderedList(int min, int max){
+        List<Integer> list = new ArrayList<Integer>();
+        for(int i = min; i <= max; i++){
+            list.add(i);
+        }
+        return list;
     }
     
     // Implements Fisher-Yates:
@@ -117,17 +188,22 @@ public class Problem {
         
         Problem p1 = new Problem(10, 15, 3);
         p1.writeFile("data/problem_1.in");
+        p1.writeKeyFile("data/problem_1.key");
         
         Problem p2 = new Problem(50, 64, 4);
         p2.writeFile("data/problem_2.in");
+        p2.writeKeyFile("data/problem_2.key");
         
         Problem p3 = new Problem(100, 50, 4);
         p3.writeFile("data/problem_3.in");
+        p3.writeKeyFile("data/problem_3.key");
         
         Problem p4 = new Problem(100, 100, 6);
         p4.writeFile("data/problem_4.in");
+        p4.writeKeyFile("data/problem_4.key");
         
         Problem p5 = new Problem(150, 200, 8);
         p5.writeFile("data/problem_5.in");
+        p5.writeKeyFile("data/problem_5.key");
     }
 }
