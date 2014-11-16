@@ -51,7 +51,7 @@ public class Graph {
      * 
      * @return
      */
-    public boolean isConneced() {
+    public boolean isConnected() {
         // Construct the undirected version of the graph
         Graph c = this.clone();
         for(int i = 1; i <= c.nodes; i++){
@@ -137,7 +137,7 @@ public class Graph {
 
         // Randomly add nodes - 1 edges as long as it doesn't create a cycle
         int eCount = 0;
-        while(eCount < nodeCount - 1){
+        while(eCount < nodeCount - 1 || !g.isConnected()){
             int i = RAND.nextInt(nodeCount) + 1;
             int j = RAND.nextInt(nodeCount) + 1;
             // Don't generate self loops or add edges that already exist
@@ -208,6 +208,7 @@ public class Graph {
                     cycle = true;
                 }
             }
+            onStack[v] = false;
         }
         
         public boolean hasCycle(){

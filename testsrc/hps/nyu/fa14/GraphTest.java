@@ -22,7 +22,7 @@ public class GraphTest {
         for(int i = 2; i <= g.nodes; i++) {
             g.edges[1][i] = true;
         }
-        assertTrue(g.isConneced());
+        assertTrue(g.isConnected());
     }
 
     @Test
@@ -45,9 +45,9 @@ public class GraphTest {
         for(int i = 0; i < 100; i++){
             int nodeCount = RAND.nextInt(70) + 30; 
             Graph g = Graph.randomDAG(nodeCount);
-            assertTrue(g.isConneced());
+            assertTrue(g.isConnected());
             assertTrue(g.isAcyclic());
-            assertEquals(nodeCount - 1, g.numEdges());            
+            assertTrue(g.numEdges() >= nodeCount - 1);            
         }
     }
 
