@@ -65,6 +65,9 @@ public class Agonizer {
     					g1[cycleNodes.get(m)][cycleNodes.get(m+1)] = 0;
     				}
     				g1[cycleNodes.get(cycleNodes.size()-1)][cycleNodes.get(0)] *= -1;
+    				g1[cycleNodes.get(0)][cycleNodes.get(cycleNodes.size()-1)] 
+    						= g1[cycleNodes.get(cycleNodes.size()-1)][cycleNodes.get(0)];
+    				g1[cycleNodes.get(cycleNodes.size()-1)][cycleNodes.get(0)] = 0;
     			}
     			
     			revereseAllPositiveEdges(g1);
