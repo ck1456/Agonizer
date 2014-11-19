@@ -13,6 +13,7 @@ public class Agonizer {
     	for(int i:partition.partitionMap.keySet()) {
     		partitions.put(i, new ArrayList<Graph>());
     	}
+    	int totalAgony = 0;
         for(int i=1;i<graphs.size();i++) {
         	Graph g = graphs.get(i);
         	// partition number
@@ -24,6 +25,7 @@ public class Agonizer {
         for(int partNumber: partitions.keySet()) {
         	System.out.println("Partition number "+partNumber);
         	List<Graph> graphsInPartition = partitions.get(partNumber);
+        	int maxPairwiseAgonyForCluster = 0;
         	for(int i=0;i<graphsInPartition.size();i++) {
         		for(int j=i+1;j<graphsInPartition.size();j++) {
         			//agony calculation of union of graph i and graph j
@@ -61,10 +63,26 @@ public class Agonizer {
         				labels[faultyEdge.get(1)] = labels[faultyEdge.get(0)] 
         						- g1[faultyEdge.get(0)][faultyEdge.get(1)];
         			}
+        			
+        			//calculate agony for this graph now.
+        			//this is the agony of the pair i and j
+        			int agonyOfPair = 0;
+        			for(int p=1;p<=a.nodes;p++) {
+        				for(int q=1;q<=a.nodes;q++) {
+        					if(g1[p][q] != 0) {
+        						agonyOfPair += Math.max(labels[p] - labels[q] + 1, 0);
+        					}
+        				}
+        			}
+        			if(agonyOfPair > maxPairwiseAgonyForCluster) {
+        				maxPairwiseAgonyForCluster = agonyOfPair;
+        			}
         		}
         	}
+        	//maxPairwiseAgonyForCluster has the agony of the cluster
+        	totalAgony += maxPairwiseAgonyForCluster;
         }
-        return 0;
+        return totalAgony;
     }
     
     private static List<Integer> faultyEdgeExists(int[][] graph, int[] labels) {
