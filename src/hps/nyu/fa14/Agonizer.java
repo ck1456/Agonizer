@@ -14,13 +14,13 @@ public class Agonizer {
     		partitions.put(i, new ArrayList<Graph>());
     	}
     	int totalAgony = 0;
-        for(int i=1;i<graphs.size();i++) {
-        	Graph g = graphs.get(i);
+        for(int i=1;i<=graphs.size();i++) {
+        	Graph g = graphs.get(i-1);
         	// partition number
         	int partNumber = partition.partitionMap.get(i);
         	List<Graph> graphsInPartition = partitions.get(partNumber);
         	graphsInPartition.add(g);
-        	partitions.put(partNumber, graphsInPartition);
+        	//partitions.put(partNumber, graphsInPartition);
         }
         for(int partNumber: partitions.keySet()) {
         	System.out.println("Partition number "+partNumber);
