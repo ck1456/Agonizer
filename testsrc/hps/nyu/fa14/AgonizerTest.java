@@ -64,4 +64,14 @@ public class AgonizerTest {
         int agony = Agonizer.calculateAgony(Arrays.asList(g1, g2), gp);
         assertEquals(50, agony);
     }
+    
+    @Test
+    public void testCalculateAgony_Problem1() throws Exception {
+        Problem p = Problem.parseFile("data/problem_1.in");
+        GraphPartition partition = GraphPartition.parseFile("data/problem_1.out");
+        
+        int agony = Agonizer.calculateAgony(p.graphs, partition);
+        System.out.println(agony);
+        assertEquals(50, agony);
+    }
 }
