@@ -60,7 +60,7 @@ public class Agonizer {
     					//there is an edge from mth node to m+1th node
     					//and one more edge from the last node to the 0th node
     					g1[cycleNodes.get(m)][cycleNodes.get(m+1)] *= -1;
-    					g1[cycleNodes.get(m+1)][cycleNodes.get(m)] 
+    					g1[cycleNodes.get(m+1)][cycleNodes.get(m)]
     							= g1[cycleNodes.get(m)][cycleNodes.get(m+1)];
     					g1[cycleNodes.get(m)][cycleNodes.get(m+1)] = 0;
     				}
@@ -189,18 +189,22 @@ public class Agonizer {
                     continue;  // Only proceed if adjacent
                 }
                 if(!marked[w]){
-                	edgeTo[w] = v;
+                	if(graph[v][w] == -1) {
+                	  edgeTo[w] = v;
+                	}
                     dfs(w);
                     //add this to the cycle
-                } else if(onStack[w] && graph[v][w]  == -1){
+                } else if(onStack[w] && graph[v][w] == -1){
                     cycle = true;
                     //we know all the nodes in this cycle - they are the ones that have
                     //onstack set to true
                     for(int m=v; m!=w && m!=0; m=edgeTo[m]) {
-                    	if(onStack[m]) {
+                    	//if(onStack[m]) {
                     		cycleNodes.add(m);
-                    	}
+                    	//}
                     }
+                    cycleNodes.add(w);
+                    //cycleNodes.add(v);
                     return cycleNodes;
                 }
             }
