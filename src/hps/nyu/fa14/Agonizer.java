@@ -25,67 +25,78 @@ public class Agonizer {
         for(int partNumber: partitions.keySet()) {
         	System.out.println("Partition number "+partNumber);
         	List<Graph> graphsInPartition = partitions.get(partNumber);
-        	int maxPairwiseAgonyForCluster = 0;
-        	for(int i=0;i<graphsInPartition.size();i++) {
-        		for(int j=i+1;j<graphsInPartition.size();j++) {
-        			//agony calculation of union of graph i and graph j
-        			Graph a = graphsInPartition.get(i);
-        			Graph b = graphsInPartition.get(j);
-        			Graph g = new Graph(a.nodes);
-        			int [][] g1 = new int[a.nodes + 1][a.nodes + 1];
-        			for(int x=1;x<=a.nodes;x++) {
-        				for(int y=1;y<=a.nodes;y++) {
-        					g.edges[x][y] = a.edges[x][y] | b.edges[x][y];
-        					if(g.edges[x][y]) {
-        						g1[x][y]  = -1;
-        					}
-        				}
-        			}
-        			//g is the union of a and b
-        			//we now calculate the optimal ranking for graph g
-        			//optimal ranking is one which minimized agony of the graph
-        			CycleFinder cycleFinder = new CycleFinder();
-        			List<Integer> cycleNodes = null;
-        			while((cycleNodes = cycleFinder.hasNegativeCycle(g1)).size() > 0) {
-        				for(int m=0;m<cycleNodes.size()-1;m++) {
-        					//there is an edge from mth node to m+1th node
-        					//and one more edge from the last node to the 0th node
-        					g1[cycleNodes.get(m)][cycleNodes.get(m+1)] *= -1;
-        				}
-        				g1[cycleNodes.get(cycleNodes.size()-1)][cycleNodes.get(0)] *= -1;
-        			}
-        			//all edges in g1 labeled -1 form a DAG
-        			//rest of the edges form an eulerian subgraph
-        			//label all vertices as 0
-        			int[] labels = new int[a.nodes + 1];
-        			List<Integer> faultyEdge = null;
-        			while((faultyEdge = faultyEdgeExists(g1,labels)).size() > 0) {
-        				labels[faultyEdge.get(1)] = labels[faultyEdge.get(0)] 
-        						- g1[faultyEdge.get(0)][faultyEdge.get(1)];
-        			}
-        			
-        			//calculate agony for this graph now.
-        			//this is the agony of the pair i and j
-        			int agonyOfPair = 0;
-        			for(int p=1;p<=a.nodes;p++) {
-        				for(int q=1;q<=a.nodes;q++) {
-        					if(g1[p][q] != 0) {
-        						agonyOfPair += Math.max(labels[p] - labels[q] + 1, 0);
-        					}
-        				}
-        			}
-        			if(agonyOfPair > maxPairwiseAgonyForCluster) {
-        				maxPairwiseAgonyForCluster = agonyOfPair;
-        			}
-        		}
-        	}
+        	
         	//maxPairwiseAgonyForCluster has the agony of the cluster
-        	totalAgony += maxPairwiseAgonyForCluster;
+        	
+        	totalAgony += getClusterAgony(graphsInPartition);
         }
         return totalAgony;
     }
     
-    private static List<Integer> faultyEdgeExists(int[][] graph, int[] labels) {
+    private static int getClusterAgony(List<Graph> graphsInPartition) {
+    	int maxPairwiseAgonyForCluster = 0;
+    	for(int i=0;i<graphsInPartition.size();i++) {
+    		for(int j=i+1;j<graphsInPartition.size();j++) {
+    			//agony calculation of union of graph i and graph j
+    			Graph a = graphsInPartition.get(i);
+    			Graph b = graphsInPartition.get(j);
+    			Graph g = new Graph(a.nodes);
+    			int [][] g1 = new int[a.nodes + 1][a.nodes + 1];
+    			for(int x=1;x<=a.nodes;x++) {
+    				for(int y=1;y<=a.nodes;y++) {
+    					g.edges[x][y] = a.edges[x][y] | b.edges[x][y];
+    					if(g.edges[x][y]) {
+    						g1[x][y]  = -1;
+    					}
+    				}
+    			}
+    			//g is the union of a and b
+    			//we now calculate the optimal ranking for graph g
+    			//optimal ranking is one which minimized agony of the graph
+    			CycleFinder cycleFinder = new CycleFinder();
+    			List<Integer> cycleNodes = null;
+    			while((cycleNodes = cycleFinder.getNodesOfCycleWithNegativeEdges(g1)).size() > 0) {
+    				for(int m=0;m<cycleNodes.size()-1;m++) {
+    					//there is an edge from mth node to m+1th node
+    					//and one more edge from the last node to the 0th node
+    					g1[cycleNodes.get(m)][cycleNodes.get(m+1)] *= -1;
+    				}
+    				g1[cycleNodes.get(cycleNodes.size()-1)][cycleNodes.get(0)] *= -1;
+    			}
+    			//all edges in g1 labeled -1 form a DAG
+    			//rest of the edges form an eulerian subgraph
+    			//label all vertices as 0
+    			int[] labels = new int[a.nodes + 1];
+    			List<Integer> faultyEdge = null;
+    			while((faultyEdge = getFaultyEdgeIfExists(g1,labels)).size() > 0) {
+    				labels[faultyEdge.get(1)] = labels[faultyEdge.get(0)] 
+    						- g1[faultyEdge.get(0)][faultyEdge.get(1)];
+    			}
+    			
+    			//calculate agony for this graph now.
+    			//this is the agony of the pair i and j
+    			int agonyOfPair = getAgony(g1, labels);
+    			if(agonyOfPair > maxPairwiseAgonyForCluster) {
+    				maxPairwiseAgonyForCluster = agonyOfPair;
+    			}
+    		}
+    	}
+    	return maxPairwiseAgonyForCluster;
+    }
+    
+    private static int getAgony(int[][] graph, int[] labels) {
+    	int agony = 0;
+		for(int p=1;p<graph.length;p++) {
+			for(int q=1;q<graph.length;q++) {
+				if(graph[p][q] != 0) {
+					agony += Math.max(labels[p] - labels[q] + 1, 0);
+				}
+			}
+		}
+		return agony;
+    }
+    
+    private static List<Integer> getFaultyEdgeIfExists(int[][] graph, int[] labels) {
     	List<Integer> nodes = new ArrayList<Integer>();
     	for(int i=1;i<graph.length;i++) {
     		for(int j=1;j<graph.length;j++) {
@@ -163,7 +174,7 @@ public class Agonizer {
             return cycleNodes;
         }
         
-        public List<Integer> hasNegativeCycle(int[][] g){
+        public List<Integer> getNodesOfCycleWithNegativeEdges(int[][] g){
         	graph = g;
         	cycle = false;
         	marked = new boolean[graph.length];
