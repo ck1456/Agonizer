@@ -1,6 +1,7 @@
 package hps.nyu.fa14;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 import java.util.Arrays;
 import java.util.List;
@@ -40,7 +41,18 @@ public class AgonizerTest {
         graph[2][3] = 1;
         Agonizer.CycleFinder cycleFinder = new Agonizer.CycleFinder();
         List<Integer> cycleNodes = cycleFinder.getNodesOfCycleWithNegativeEdges(graph);
-        System.out.println(cycleNodes);
+        assertEquals(4, cycleNodes.size());
+    }
+    
+    @Test
+    public void testCheckNoLoopFinder() {
+        int[][] graph = new int[4][4];
+        graph[1][2] = -1;
+        graph[2][3] = -1;
+        graph[1][3] = -1;
+        Agonizer.CycleFinder cycleFinder = new Agonizer.CycleFinder();
+        List<Integer> cycleNodes = cycleFinder.getNodesOfCycleWithNegativeEdges(graph);
+        assertNull(cycleNodes);
     }
     
     

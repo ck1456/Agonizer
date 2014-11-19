@@ -20,7 +20,7 @@ public class Agonizer {
         	int partNumber = partition.partitionMap.get(i+1);
         	List<Graph> graphsInPartition = partitions.get(partNumber);
         	graphsInPartition.add(g);
-        	partitions.put(partNumber, graphsInPartition);
+        	//partitions.put(partNumber, graphsInPartition);
         }
         for(int partNumber: partitions.keySet()) {
         	System.out.println("Partition number "+partNumber);

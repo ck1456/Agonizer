@@ -28,8 +28,6 @@ public class GraphPartition {
         int graphID = 1;
         while((line = br.readLine()) != null){
             // parse into the map
-            //String[] parts = line.trim().split("\\s");
-            //int g = Integer.parseInt(parts[0]); // graph
             int p = Integer.parseInt(line); // partition
             part.partitionMap.put(graphID, p);
             graphID++;
@@ -40,5 +38,4 @@ public class GraphPartition {
     public static GraphPartition parseFile(String filePath) throws IOException {
         return parse(new FileInputStream(new File(filePath)));
     }
-    
 }
