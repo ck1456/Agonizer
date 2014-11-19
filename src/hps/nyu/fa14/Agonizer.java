@@ -1,6 +1,7 @@
 package hps.nyu.fa14;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -27,7 +28,6 @@ public class Agonizer {
         	List<Graph> graphsInPartition = partitions.get(partNumber);
         	
         	//maxPairwiseAgonyForCluster has the agony of the cluster
-        	
         	totalAgony += getClusterAgony(graphsInPartition);
         }
         return totalAgony;
@@ -40,51 +40,49 @@ public class Agonizer {
     			//agony calculation of union of graph i and graph j
     			Graph a = graphsInPartition.get(i);
     			Graph b = graphsInPartition.get(j);
-    			Graph g = new Graph(a.nodes);
-    			int [][] g1 = new int[a.nodes + 1][a.nodes + 1];
+                //g is the union of a and b
+    			Graph g = a.union(b);    			
+    			int [][] w = new int[a.nodes + 1][a.nodes + 1];
     			for(int x=1;x<=a.nodes;x++) {
     				for(int y=1;y<=a.nodes;y++) {
-    					g.edges[x][y] = a.edges[x][y] || b.edges[x][y];
     					if(g.edges[x][y]) {
-    						g1[x][y]  = -1;
+    						w[x][y]  = -1;
     					}
     				}
     			}
-    			//g is the union of a and b
     			//we now calculate the optimal ranking for graph g
     			//optimal ranking is one which minimized agony of the graph
-    			CycleFinder cycleFinder = new CycleFinder();
-    			List<Integer> cycleNodes = null;
-    			while((cycleNodes = cycleFinder.getNodesOfCycleWithNegativeEdges(g1)).size() > 0) {
+    			List<Integer> cycleNodes = new CycleFinder().getNodesOfCycleWithNegativeEdges(g, w);
+    			while(cycleNodes != null && cycleNodes.size() > 0) {
     				for(int m=0;m<cycleNodes.size()-1;m++) {
     					//there is an edge from mth node to m+1th node
-    					//and one more edge from the last node to the 0th node
-    					g1[cycleNodes.get(m)][cycleNodes.get(m+1)] *= -1;
-    					g1[cycleNodes.get(m+1)][cycleNodes.get(m)]
-    							= g1[cycleNodes.get(m)][cycleNodes.get(m+1)];
-    					g1[cycleNodes.get(m)][cycleNodes.get(m+1)] = 0;
+    				    int u = cycleNodes.get(m);
+    				    int v = cycleNodes.get(m+1);
+    				    //and one more edge from the last node to the 0th node
+    					w[u][v] = w[u][v] * -1;
+    					// reverses the edge
+    					g.edges[v][u] = true;
+    					g.edges[u][v] = false;
     				}
-    				/*g1[cycleNodes.get(cycleNodes.size()-1)][cycleNodes.get(0)] *= -1;
-    				g1[cycleNodes.get(0)][cycleNodes.get(cycleNodes.size()-1)] 
-    						= g1[cycleNodes.get(cycleNodes.size()-1)][cycleNodes.get(0)];
-    				g1[cycleNodes.get(cycleNodes.size()-1)][cycleNodes.get(0)] = 0;*/
+    				System.out.println("Cycle updated");
+    				cycleNodes = new CycleFinder().getNodesOfCycleWithNegativeEdges(g, w);
     			}
     			
-    			revereseAllPositiveEdges(g1);
+    			reverseAllPositiveEdges(g, w);
     			
     			//all edges in g1 labeled -1 form a DAG
     			//rest of the edges form an eulerian subgraph
     			//label all vertices as 0
     			int[] labels = new int[a.nodes + 1];
     			List<Integer> faultyEdge = null;
-    			while((faultyEdge = getFaultyEdgeIfExists(g1,labels)).size() > 0) {
+    			while((faultyEdge = getFaultyEdgeIfExists(w,labels)).size() > 0) {
     				labels[faultyEdge.get(1)] = labels[faultyEdge.get(0)] 
-    						- g1[faultyEdge.get(0)][faultyEdge.get(1)];
+    						- w[faultyEdge.get(0)][faultyEdge.get(1)];
     			}
     			
     			//calculate agony for this graph now.
     			//this is the agony of the pair i and j
-    			int agonyOfPair = getAgony(g1, labels);
+    			int agonyOfPair = getAgony(w, labels);
     			if(agonyOfPair > maxPairwiseAgonyForCluster) {
     				maxPairwiseAgonyForCluster = agonyOfPair;
     			}
@@ -93,12 +91,12 @@ public class Agonizer {
     	return maxPairwiseAgonyForCluster;
     }
     
-    private static void revereseAllPositiveEdges(int[][] graph) {
-    	for(int i=1;i<graph.length;i++) {
-    		for(int j=1;j<graph.length;j++) {
-    			if(graph[i][j] == 1) {
-    				graph[j][i] = 1;
-    				graph[i][j] = 0;
+    private static void reverseAllPositiveEdges(Graph g, int[][] weights) {
+    	for(int i=1;i<=g.nodes;i++) {
+    		for(int j=1;j<=g.nodes;j++) {
+    			if(weights[i][j] == 1) {
+    				g.edges[j][i] = true;
+    				g.edges[j][i] = false;
     			}
     		}
     	}
@@ -106,16 +104,17 @@ public class Agonizer {
     
     public static int getAgony(int[][] graph, int[] labels) {
     	int agony = 0;
-		for(int p=1;p<graph.length;p++) {
-			for(int q=1;q<graph.length;q++) {
-				if(graph[p][q] != 0) {
-					agony += Math.max(labels[p] - labels[q] + 1, 0);
+		for(int u=1;u<graph.length;u++) {
+			for(int v=1;v<graph.length;v++) {
+				if(graph[u][v] > 0) {
+					agony += Math.max(labels[u] - labels[v] + 1, 0);
 				}
 			}
 		}
 		return agony;
     }
     
+    /*
     public static int getAgony(Graph graph, int[] labels) {
     	int agony = 0;
 		for(int p=1;p<graph.edges.length;p++) {
@@ -126,7 +125,7 @@ public class Agonizer {
 			}
 		}
 		return agony;
-    }
+    }*/
     
     private static List<Integer> getFaultyEdgeIfExists(int[][] graph, int[] labels) {
     	List<Integer> nodes = new ArrayList<Integer>();
@@ -174,8 +173,8 @@ public class Agonizer {
         
         private boolean[] marked;
         private boolean[] onStack;
-        private boolean cycle;
-        private int[][] graph;
+        private Graph graph;
+        private int[][] weights;
         int[] edgeTo;
         List<Integer> cycleNodes = null;
         
@@ -184,45 +183,47 @@ public class Agonizer {
         private void dfs(int v){
             onStack[v] = true;
             marked[v] = true;
-            for(int w = 1; w < graph.length; w++){
-                if(graph[v][w] == 0){
+            for(int w = 1; w <= graph.nodes; w++){
+                if(!graph.edges[v][w]){
                     continue;  // Only proceed if adjacent
                 }
                 if(cycleNodes != null) {
                 	return;
                 }
                 else if(!marked[w]){
-                	if(graph[v][w] == -1) {
+                    // Check that it is a negative weight edge
+                	if(graph.edges[v][w] && weights[v][w] == -1) {
                 	  edgeTo[w] = v;
                 	}
                     dfs(w);
                     //add this to the cycle
-                } else if(onStack[w] && graph[v][w] == -1){
-                    //edgeTo[w] = v;
+                } else if(onStack[w] && graph.edges[v][w] && weights[v][w] == -1){
                     //we know all the nodes in this cycle - they are the ones that have
                     //onstack set to true
                     cycleNodes = new ArrayList<Integer>();
-                    for(int m=v; m!=w && m!=0; m=edgeTo[m]) {
+                    for(int m=v; m!=w && m != 0; m=edgeTo[m]) {
                     	cycleNodes.add(m);
                     }
                     cycleNodes.add(w);
                     cycleNodes.add(v);
-                    //return cycleNodes;
+                    // Need to return the edges in the correct order
+                    // (following the direction of edges)
+                    Collections.reverse(cycleNodes);
                 }
             }
             onStack[v] = false;
         }
         
-        public List<Integer> getNodesOfCycleWithNegativeEdges(int[][] g){
+        public List<Integer> getNodesOfCycleWithNegativeEdges(Graph g, int[][] w){
         	graph = g;
-        	cycle = false;
-        	marked = new boolean[graph.length];
-        	edgeTo  = new int[graph.length];
-        	onStack = new boolean[graph.length];;
-            for(int v = 1; v < graph.length; v++){
+        	weights = w;
+        	marked = new boolean[graph.nodes + 1];
+        	edgeTo  = new int[graph.nodes + 1];
+        	onStack = new boolean[graph.nodes + 1];;
+            for(int v = 1; v <= graph.nodes; v++){
                 if(!marked[v]){
                     dfs(v);
-                    if(cycleNodes != null && cycleNodes.size() > 0) {
+                    if(cycleNodes != null) {
                     	return cycleNodes;
                     }
                 }
@@ -230,5 +231,4 @@ public class Agonizer {
             return cycleNodes;
         }
     }
-
 }
