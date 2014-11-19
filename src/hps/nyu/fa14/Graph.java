@@ -108,6 +108,24 @@ public class Graph {
         }
         return g;
     }
+    
+    /**
+     * Returns a new graph with the same nodeset and the union of all of the edges from both graphs
+     * @param other
+     * @return
+     */
+    public Graph union(Graph other){
+        if(this.nodes != other.nodes){
+            throw new IndexOutOfBoundsException("Graph must have same node set");
+        }
+        Graph g = new Graph(this.nodes);
+        for(int i = 1; i <= this.nodes; i++){
+            for(int j = 1; j <= this.nodes; j++){
+                g.edges[i][j] = this.edges[i][j] || other.edges[i][j];
+            }
+        }
+        return g;
+    }
 
     /**
      * Write the representation of a graph as a set of edges
