@@ -151,7 +151,7 @@ public class Agonizer {
             onStack[v] = true;
             marked[v] = true;
             List<Integer> cycleNodes = new ArrayList<Integer>();
-            for(int w = 1; w <= graph.length; w++){
+            for(int w = 1; w < graph.length; w++){
                 if(graph[v][w] == 0){
                     continue;  // Only proceed if adjacent
                 }
@@ -162,7 +162,7 @@ public class Agonizer {
                     cycle = true;
                     //we know all the nodes in this cycle - they are the ones that have
                     //onstack set to true
-                    for(int m=1;m<=graph.length;m++) {
+                    for(int m=1;m<graph.length;m++) {
                     	if(onStack[m]) {
                     		cycleNodes.add(m);
                     	}
@@ -180,7 +180,7 @@ public class Agonizer {
         	marked = new boolean[graph.length];
         	onStack = new boolean[graph.length];;
         	List<Integer> cycleNodes = new ArrayList<Integer>();
-            for(int v = 1; v <= graph.length; v++){
+            for(int v = 1; v < graph.length; v++){
                 if(!marked[v]){
                     cycleNodes = dfs(v);
                 }
