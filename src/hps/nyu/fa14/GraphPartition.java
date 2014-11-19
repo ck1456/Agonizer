@@ -25,17 +25,19 @@ public class GraphPartition {
         
         BufferedReader br = new BufferedReader(new InputStreamReader(input));
         String line = null;
+        int graphID = 1;
         while((line = br.readLine()) != null){
             // parse into the map
-            String[] parts = line.trim().split("\\s");
-            int g = Integer.parseInt(parts[0]); // graph
-            int p = Integer.parseInt(parts[1]); // partition
-            part.partitionMap.put(g, p);
+            //String[] parts = line.trim().split("\\s");
+            //int g = Integer.parseInt(parts[0]); // graph
+            int p = Integer.parseInt(line); // partition
+            part.partitionMap.put(graphID, p);
+            graphID++;
         }        
         return part;
     }
     
-    public GraphPartition parseFile(String filePath) throws IOException {
+    public static GraphPartition parseFile(String filePath) throws IOException {
         return parse(new FileInputStream(new File(filePath)));
     }
     

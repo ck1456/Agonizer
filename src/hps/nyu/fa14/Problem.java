@@ -1,9 +1,13 @@
 package hps.nyu.fa14;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
@@ -27,8 +31,6 @@ public class Problem {
         this.n = n;
         this.m = m;
         this.k = k;
-
-        generateGraphs();
     }
 
     private static final Random RAND = new Random();
@@ -175,6 +177,34 @@ public class Problem {
         writeKey(new FileOutputStream(new File(filePath)));
     }
 
+    /**
+     * Parse a serialized problem back into the originally specified graphs
+     */
+    public static Problem parse(InputStream input) throws IOException {
+        
+        // parse n, m, k on the first line
+        BufferedReader br = new BufferedReader(new InputStreamReader(input));
+
+        String line = br.readLine();
+        String[] toks = line.trim().split("\\s");
+        int N = Integer.parseInt(toks[0]);
+        int M = Integer.parseInt(toks[1]);
+        int K = Integer.parseInt(toks[2]);
+        
+        Problem p = new Problem(N, M, K);
+        while ((line = br.readLine()) != null) {
+            // parse a graph from a line
+            Graph g = Graph.fromString(N, line);
+            p.graphs.add(g);
+        }
+        return p;
+    }
+    
+    public static Problem parseFile(String filePath) throws IOException {
+        return parse(new FileInputStream(new File(filePath)));
+    }
+    
+    
     private static List<Integer> orderedList(int min, int max) {
         List<Integer> list = new ArrayList<Integer>();
         for(int i = min; i <= max; i++) {
@@ -203,26 +233,31 @@ public class Problem {
 
         System.out.println("Problem 1");
         Problem p1 = new Problem(10, 15, 3);
+        p1.generateGraphs();
         p1.writeFile("data/problem_1.in");
         p1.writeKeyFile("data/problem_1.key");
 
         System.out.println("Problem 2");
         Problem p2 = new Problem(50, 64, 4);
+        p2.generateGraphs();
         p2.writeFile("data/problem_2.in");
         p2.writeKeyFile("data/problem_2.key");
 
         System.out.println("Problem 3");
         Problem p3 = new Problem(100, 50, 4);
+        p3.generateGraphs();
         p3.writeFile("data/problem_3.in");
         p3.writeKeyFile("data/problem_3.key");
 
         System.out.println("Problem 4");
         Problem p4 = new Problem(100, 100, 6);
+        p4.generateGraphs();
         p4.writeFile("data/problem_4.in");
         p4.writeKeyFile("data/problem_4.key");
 
         System.out.println("Problem 5");
         Problem p5 = new Problem(150, 200, 8);
+        p5.generateGraphs();
         p5.writeFile("data/problem_5.in");
         p5.writeKeyFile("data/problem_5.key");
     }

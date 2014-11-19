@@ -125,6 +125,18 @@ public class Graph {
         bw.newLine();
     }
     
+    public static Graph fromString(int nodeCount, String edgeList){
+        Graph g = new Graph(nodeCount);
+        String[] edges = edgeList.trim().split("\\s");
+        for(String e : edges){
+            String[] endPoints = e.trim().split(",");
+            int from = Integer.parseInt(endPoints[0]);
+            int to = Integer.parseInt(endPoints[1]);
+            g.edges[from][to] = true;
+        }
+        return g;
+    }
+    
     private static final Random RAND = new Random();
     
     /**

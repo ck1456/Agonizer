@@ -103,9 +103,28 @@ public class Agonizer {
      * Calculates the cumulative agony in a set of clustered graphs
      * @param args
      */
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         
+        // Parse the first argument as the city input file and the second as the
+        // tour solution file
+        if (args.length != 2) {
+            usage();
+            System.exit(-1);
+        }
+        
+        String inputFile = args[0];
+        String solutionFile = args[1];
 
+        Problem p = Problem.parseFile(inputFile);
+        GraphPartition partition = GraphPartition.parseFile(solutionFile);
+        
+        int agony = calculateAgony(p.graphs, partition);
+        System.out.println(agony);
+    }
+    
+    private static void usage() {
+        // How to use it
+        System.out.println("java -jar agonizer.jar <input_file> <output_file>");
     }
     
     private static class CycleFinder {
