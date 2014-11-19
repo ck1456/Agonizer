@@ -60,9 +60,15 @@ public class Agonizer {
     					//there is an edge from mth node to m+1th node
     					//and one more edge from the last node to the 0th node
     					g1[cycleNodes.get(m)][cycleNodes.get(m+1)] *= -1;
+    					g1[cycleNodes.get(m+1)][cycleNodes.get(m)] 
+    							= g1[cycleNodes.get(m)][cycleNodes.get(m+1)];
+    					g1[cycleNodes.get(m)][cycleNodes.get(m+1)] = 0;
     				}
     				g1[cycleNodes.get(cycleNodes.size()-1)][cycleNodes.get(0)] *= -1;
     			}
+    			
+    			revereseAllPositiveEdges(g1);
+    			
     			//all edges in g1 labeled -1 form a DAG
     			//rest of the edges form an eulerian subgraph
     			//label all vertices as 0
@@ -84,6 +90,17 @@ public class Agonizer {
     	return maxPairwiseAgonyForCluster;
     }
     
+    private static void revereseAllPositiveEdges(int[][] graph) {
+    	for(int i=1;i<graph.length;i++) {
+    		for(int j=1;j<graph.length;j++) {
+    			if(graph[i][j] == 1) {
+    				graph[j][i] = 1;
+    				graph[i][j] = 0;
+    			}
+    		}
+    	}
+    }
+    
     private static int getAgony(int[][] graph, int[] labels) {
     	int agony = 0;
 		for(int p=1;p<graph.length;p++) {
@@ -96,11 +113,23 @@ public class Agonizer {
 		return agony;
     }
     
+    private static int getAgony(Graph graph, int[] labels) {
+    	int agony = 0;
+		for(int p=1;p<graph.edges.length;p++) {
+			for(int q=1;q<graph.edges.length;q++) {
+				if(!graph.edges[p][q]) {
+					agony += Math.max(labels[p] - labels[q] + 1, 0);
+				}
+			}
+		}
+		return agony;
+    }
+    
     private static List<Integer> getFaultyEdgeIfExists(int[][] graph, int[] labels) {
     	List<Integer> nodes = new ArrayList<Integer>();
     	for(int i=1;i<graph.length;i++) {
     		for(int j=1;j<graph.length;j++) {
-    			if(labels[j] < labels[i] - graph[i][j]) {
+    			if(!(graph[i][j] != 0) && (labels[j] < labels[i] - graph[i][j])) {
     				nodes.add(i);
     				nodes.add(j);
     				return nodes;
