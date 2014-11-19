@@ -10,6 +10,7 @@ import org.junit.Test;
 
 public class AgonizerTest {
 
+	@Ignore
     @Test
     public void testCalculatePairwiseAgony_4Nodes() {
         Graph g1 = new Graph(4);
@@ -30,18 +31,19 @@ public class AgonizerTest {
         assertEquals(2, agony);        
     }
     
+	@Ignore
     @Test
     public void testCheckLoopFinder() {
         int[][] graph = new int[4][4];
         graph[1][2] = -1;
-        graph[2][3] = -1;
-        graph[3][1] = -1;
+        graph[1][3] = -1;
+        graph[2][3] = 1;
         Agonizer.CycleFinder cycleFinder = new Agonizer.CycleFinder();
         List<Integer> cycleNodes = cycleFinder.getNodesOfCycleWithNegativeEdges(graph);
         System.out.println(cycleNodes);
     }
-
-    @Ignore
+    
+    
     @Test
     public void testCalculatePairwiseAgony() {
         Graph g1 = new Graph(3);
@@ -80,6 +82,7 @@ public class AgonizerTest {
         assertEquals(50, agony);
     }
     
+    @Ignore
     @Test
     public void testCalculateAgony_Problem1() throws Exception {
         Problem p = Problem.parseFile("data/problem_1.in");
