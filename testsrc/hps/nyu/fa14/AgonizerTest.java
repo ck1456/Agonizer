@@ -96,6 +96,7 @@ public class AgonizerTest {
         gp.partitionMap.put(2, 1);
         
         int agony = Agonizer.calculateAgony(Arrays.asList(g1, g2), gp);
+        System.out.println(agony);
         assertEquals(2, agony);
     }
     
