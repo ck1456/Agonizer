@@ -24,7 +24,7 @@ public class Agonizer {
         	//partitions.put(partNumber, graphsInPartition);
         }
         for(int partNumber: partitions.keySet()) {
-        	System.out.println("Partition number "+partNumber);
+        	//System.out.println("Partition number "+partNumber);
         	List<Graph> graphsInPartition = partitions.get(partNumber);
         	
         	//maxPairwiseAgonyForCluster has the agony of the cluster
@@ -64,7 +64,6 @@ public class Agonizer {
     					g.edges[v][u] = true;
     					g.edges[u][v] = false;
     				}
-    				System.out.println("Cycle updated");
     				cycleNodes = new CycleFinder().getNodesOfCycleWithNegativeEdges(g, w);
     			}
     			
