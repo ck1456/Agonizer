@@ -55,7 +55,7 @@ public class Agonizer {
     			//optimal ranking is one which minimized agony of the graph
     			CycleFinder cycleFinder = new CycleFinder();
     			List<Integer> cycleNodes = null;
-    			while((cycleNodes = cycleFinder.getNodesOfCycleWithNegativeEdges(g1)).size() > 0) {
+    			while((cycleNodes = cycleFinder.getNodesOfCycleWithNegativeEdges(g1)) != null && cycleNodes.size() > 0) {
     				for(int m=0;m<cycleNodes.size()-1;m++) {
     					//there is an edge from mth node to m+1th node
     					//and one more edge from the last node to the 0th node
@@ -64,6 +64,7 @@ public class Agonizer {
     							= g1[cycleNodes.get(m)][cycleNodes.get(m+1)];
     					g1[cycleNodes.get(m)][cycleNodes.get(m+1)] = 0;
     				}
+    				cycleNodes = null;
     				/*g1[cycleNodes.get(cycleNodes.size()-1)][cycleNodes.get(0)] *= -1;
     				g1[cycleNodes.get(0)][cycleNodes.get(cycleNodes.size()-1)] 
     						= g1[cycleNodes.get(cycleNodes.size()-1)][cycleNodes.get(0)];
