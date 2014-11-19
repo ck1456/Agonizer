@@ -176,6 +176,7 @@ public class Agonizer {
         private boolean[] onStack;
         private boolean cycle;
         private int[][] graph;
+        int[] edgeTo;
         
         public CycleFinder() {}
         
@@ -188,13 +189,14 @@ public class Agonizer {
                     continue;  // Only proceed if adjacent
                 }
                 if(!marked[w]){
+                	edgeTo[w] = v;
                     dfs(w);
                     //add this to the cycle
                 } else if(onStack[w] && graph[v][w]  == -1){
                     cycle = true;
                     //we know all the nodes in this cycle - they are the ones that have
                     //onstack set to true
-                    for(int m=1;m<graph.length;m++) {
+                    for(int m=v; m!=w && m!=0; m=edgeTo[m]) {
                     	if(onStack[m]) {
                     		cycleNodes.add(m);
                     	}
@@ -210,11 +212,15 @@ public class Agonizer {
         	graph = g;
         	cycle = false;
         	marked = new boolean[graph.length];
+        	edgeTo  = new int[graph.length];
         	onStack = new boolean[graph.length];;
         	List<Integer> cycleNodes = new ArrayList<Integer>();
             for(int v = 1; v < graph.length; v++){
                 if(!marked[v]){
                     cycleNodes = dfs(v);
+                    if(cycleNodes.size() > 0) {
+                    	return cycleNodes;
+                    }
                 }
             }
             return cycleNodes;
