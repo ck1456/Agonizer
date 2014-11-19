@@ -38,6 +38,18 @@ public class AgonizerTest {
         graph[3][1] = -1;
         Agonizer.CycleFinder cycleFinder = new Agonizer.CycleFinder();
         List<Integer> cycleNodes = cycleFinder.getNodesOfCycleWithNegativeEdges(graph);
+        assertEquals(4, cycleNodes.size());
+    }
+    
+    @Test
+    public void testCheckNoLoopFinder() {
+        int[][] graph = new int[4][4];
+        graph[1][2] = -1;
+        graph[2][3] = -1;
+        graph[1][3] = -1;
+        Agonizer.CycleFinder cycleFinder = new Agonizer.CycleFinder();
+        List<Integer> cycleNodes = cycleFinder.getNodesOfCycleWithNegativeEdges(graph);
+        assertEquals(0, cycleNodes.size());
         System.out.println(cycleNodes);
     }
 
