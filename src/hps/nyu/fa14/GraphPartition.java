@@ -1,11 +1,15 @@
 package hps.nyu.fa14;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -63,5 +67,20 @@ public class GraphPartition {
     
     public static GraphPartition parseFile(String filePath) throws IOException {
         return parse(new FileInputStream(new File(filePath)));
+    }
+    
+    // Write the partition map
+    public void write(OutputStream output) throws IOException {
+        BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(output));
+        // Write out all of the cluster centers
+        for(int i = 1; i <= partitionMap.size(); i++) {
+            bw.write(String.format("%d", partitionMap.get(i)));
+            bw.newLine();
+        }
+        bw.close();
+    }
+
+    public void writeFile(String filePath) throws IOException {
+        write(new FileOutputStream(new File(filePath)));
     }
 }
