@@ -18,6 +18,32 @@ public class GraphPartition {
     // Maps graphs (as indexed above) to partitions (also 1-indexed) 
     public final Map<Integer, Integer> partitionMap = new HashMap<Integer, Integer>();
     
+    
+    public boolean assertContainsNumGraphs(int m){
+        for(int i = 1; i <= m; i++){
+            if(!partitionMap.containsKey(i)){
+                System.err.println(String.format("Map does not contain partition for graph %d", i));
+                return false;
+            }
+        }
+        if(partitionMap.size() != m){
+            System.err.println("Map contains too many graphs");
+            return false;
+        }
+        return true;
+    }
+    
+    public boolean assertContainsNumPartitions(int k){
+        // ensure that all partition values are <= k
+        for(int i : partitionMap.values()){
+            if(i > k){
+                System.err.println(String.format("Unexpected partition in map: %d",  i));
+                return false;
+            }
+        }
+        return true;
+    }
+    
     // Need to supply the graphs here
     public static GraphPartition parse(InputStream input) throws IOException{
         GraphPartition part = new GraphPartition();

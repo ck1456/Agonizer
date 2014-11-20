@@ -20,13 +20,16 @@ import java.util.Random;
  */
 public class Problem {
 
+    public enum Distribution { Uniform, Fractal, Poisson }
+    
     public final int n;
     public final int m;
     public final int k;
 
     public List<Graph> graphs = new ArrayList<Graph>();
-    public List<Graph> clusterCenters = new ArrayList<Graph>();
-
+    public List<Graph> clusterCenters;
+    private GraphPartition partition;
+    
     private Problem(int n, int m, int k) {
         this.n = n;
         this.m = m;
@@ -35,7 +38,8 @@ public class Problem {
 
     private static final Random RAND = new Random();
 
-    private void generateGraphs() {
+    private void generateGraphs(Distribution dist) {
+        clusterCenters = new ArrayList<Graph>();
         // Generate k cluster centers
         for(int i = 0; i < k; i++) {
             Graph c = Graph.randomDAG(n);
@@ -47,29 +51,54 @@ public class Problem {
         int[] partitionCounts = new int[k];
         // The sum of all of the partition counts must equal m
         // Try three different distributions:
-        // - Uniform
-        // - Fractal distribution
-        // - Poisson distribution
-
-        // Uniform
-        for(int i = 0; i < m; i++) {
-            partitionCounts[RAND.nextInt(k)]++;
+        switch(dist){
+        case Poisson: // TODO: Implement this
+            // Poisson
+        case Uniform:
+            // Uniform
+            for(int i = 0; i < m; i++) {
+                partitionCounts[RAND.nextInt(k)]++;
+            }            
+            break;
+        case Fractal:
+            // Fractal
+            List<Integer> fDist = Fractal.generateFractalDistribution(.75, k);
+            for(int i = 0; i < m; i++) {
+                int s = i % fDist.size();
+                partitionCounts[fDist.get(s) - 1]++;
+            }            
+            break;
         }
-
-        // Fractal
-
-        // Poisson
 
         // For each cluster center, generate a sufficient number of modified
         // samples within a maximum agony
+        graphs = new ArrayList<Graph>(m);
+        int[] partitionAssignments = new int[m];
+        int graphIndex = 0;
         for(int i = 0; i < k; i++) {
             Graph c = clusterCenters.get(i);
             for(int j = 0; j < partitionCounts[i]; j++) {
                 Graph mod = modGraph(c, 5);
                 // modify this graph to induce some maximum agony
                 graphs.add(mod);
+                partitionAssignments[graphIndex] = i;
+                graphIndex++;
             }
         }
+        
+        // Randomize the graphs in the list
+        List<Integer> graphOrder = orderedList(0, graphs.size() - 1);
+        List<Graph> randomizedGraphs = new ArrayList<Graph>(graphs);
+        permute(graphOrder);
+        partition = new GraphPartition();
+        
+        for(int i = 0; i < graphOrder.size(); i++){
+            int newPos = graphOrder.get(i);
+            randomizedGraphs.set(newPos, graphs.get(i));
+            // keep track of the optimal mapping (graph partition) 1-indexed
+            partition.partitionMap.put(newPos + 1, partitionAssignments[i] + 1);
+        }
+        graphs=randomizedGraphs;
     }
 
     /**
@@ -111,9 +140,9 @@ public class Problem {
         // it does not cause a cycle
 
         while (edgesToAdd > 0) {
-            if(!(mod.isAcyclic())) {
-                System.out.println("Badness 2");
-            }
+//            if(!(mod.isAcyclic())) {
+//                System.out.println("Badness 2");
+//            }
             permute(p1);
             permute(p2);
             rLoop: for(int i : p1) {
@@ -139,21 +168,15 @@ public class Problem {
     public void write(OutputStream output) throws IOException {
 
         BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(output));
-
-        // The first line is
-        // N M K
+        // The first line is: N M K
         bw.write(String.format("%d %d %d", n, m, k));
         bw.newLine();
-
-        // Randomize the graphs in the list
-        permute(graphs);
 
         // Write out all of the graphs
         for(int i = 0; i < graphs.size(); i++) {
             Graph g = graphs.get(i);
             g.write(bw);
         }
-
         bw.close();
     }
 
@@ -163,7 +186,6 @@ public class Problem {
 
     // Write the cluster centers and the original partition map
     public void writeKey(OutputStream output) throws IOException {
-
         BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(output));
         // Write out all of the cluster centers
         for(int i = 0; i < clusterCenters.size(); i++) {
@@ -175,6 +197,21 @@ public class Problem {
 
     public void writeKeyFile(String filePath) throws IOException {
         writeKey(new FileOutputStream(new File(filePath)));
+    }
+    
+    // Write the partition map
+    public void writePartition(OutputStream output) throws IOException {
+        BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(output));
+        // Write out all of the cluster centers
+        for(int i = 1; i <= partition.partitionMap.size(); i++) {
+            bw.write(String.format("%d", partition.partitionMap.get(i)));
+            bw.newLine();
+        }
+        bw.close();
+    }
+
+    public void writePartitionFile(String filePath) throws IOException {
+        writePartition(new FileOutputStream(new File(filePath)));
     }
 
     /**
@@ -204,7 +241,6 @@ public class Problem {
         return parse(new FileInputStream(new File(filePath)));
     }
     
-    
     private static List<Integer> orderedList(int min, int max) {
         List<Integer> list = new ArrayList<Integer>();
         for(int i = min; i <= max; i++) {
@@ -231,34 +267,24 @@ public class Problem {
      */
     public static void main(String[] args) throws Exception {
 
-        System.out.println("Problem 1");
-        Problem p1 = new Problem(10, 15, 3);
-        p1.generateGraphs();
-        p1.writeFile("data/problem_1.in");
-        p1.writeKeyFile("data/problem_1.key");
-
-        System.out.println("Problem 2");
-        Problem p2 = new Problem(50, 64, 4);
-        p2.generateGraphs();
-        p2.writeFile("data/problem_2.in");
-        p2.writeKeyFile("data/problem_2.key");
-
-        System.out.println("Problem 3");
-        Problem p3 = new Problem(100, 50, 4);
-        p3.generateGraphs();
-        p3.writeFile("data/problem_3.in");
-        p3.writeKeyFile("data/problem_3.key");
-
-        System.out.println("Problem 4");
-        Problem p4 = new Problem(100, 100, 6);
-        p4.generateGraphs();
-        p4.writeFile("data/problem_4.in");
-        p4.writeKeyFile("data/problem_4.key");
-
-        System.out.println("Problem 5");
-        Problem p5 = new Problem(150, 200, 8);
-        p5.generateGraphs();
-        p5.writeFile("data/problem_5.in");
-        p5.writeKeyFile("data/problem_5.key");
-    }
+        int[] nList = new int[]{ 10, 50, 100, 100, 150 };
+        int[] mList = new int[]{ 15, 64, 50, 100, 200 };
+        int[] kList = new int[]{ 3, 4, 4, 6, 8 };
+        Distribution[] dList = new Distribution[]{
+                Distribution.Uniform,
+                Distribution.Uniform, 
+                Distribution.Fractal,
+                Distribution.Poisson,
+                Distribution.Fractal };
+        
+        for(int i = 0; i < nList.length; i++){
+            String name = String.format("problem_%d", i+1);
+            System.out.println(name);
+            Problem p = new Problem(nList[i], mList[i], kList[i]);
+            p.generateGraphs(dList[i]);
+            p.writeFile(String.format("data/%s.in", name));
+            p.writeKeyFile(String.format("data/%s.key", name));
+            p.writePartitionFile(String.format("data/%s.out", name));
+        }
+   }
 }
