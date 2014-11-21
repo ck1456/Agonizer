@@ -29,7 +29,7 @@ public class AgonizerTest {
         gp.partitionMap.put(2, 1);
         
         int agony = Agonizer.calculateAgony(Arrays.asList(g1, g2), gp);
-        assertEquals(3, agony);        
+        assertEquals(3, agony);
     }
     
     @Test
@@ -43,7 +43,7 @@ public class AgonizerTest {
         w[1][2] = -1;
         w[2][3] = -1;
         w[3][1] = -1;
-        Agonizer.CycleFinder cycleFinder = new Agonizer.CycleFinder();
+        AgonyUtil.CycleFinder cycleFinder = new AgonyUtil.CycleFinder();
         List<Integer> cycleNodes = cycleFinder.getNodesOfCycleWithNegativeEdges(g, w);
         assertEquals(4, cycleNodes.size());
     }
@@ -59,7 +59,7 @@ public class AgonizerTest {
         w[1][2] = -1;
         w[2][3] = -1;
         w[1][3] = -1;
-        Agonizer.CycleFinder cycleFinder = new Agonizer.CycleFinder();
+        AgonyUtil.CycleFinder cycleFinder = new AgonyUtil.CycleFinder();
         List<Integer> cycleNodes = cycleFinder.getNodesOfCycleWithNegativeEdges(g, w);
         assertNull(cycleNodes);
     }
@@ -75,7 +75,7 @@ public class AgonizerTest {
         w[1][2] = -1;
         w[1][3] = -1;
         w[3][2] = -1;
-        Agonizer.CycleFinder cycleFinder = new Agonizer.CycleFinder();
+        AgonyUtil.CycleFinder cycleFinder = new AgonyUtil.CycleFinder();
         List<Integer> cycleNodes = cycleFinder.getNodesOfCycleWithNegativeEdges(g, w);
         assertNull(cycleNodes);
     }

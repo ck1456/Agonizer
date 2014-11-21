@@ -22,17 +22,17 @@
 			</manifest>
 		</jar>
 	</target>
-	
+
 	<target name="createjar_harmonizer" depends="compile">
-	        <jar destfile="${project.home}/harmonizer.jar" baseDir="${project.home}/bin">
-	            <manifest>
-	                <attribute name="Main-Class" value="hps.nyu.fa14.Harmonizer" />
-	            </manifest>
-	        </jar>
-	    </target>
+		<jar destfile="${project.home}/harmonizer.jar" baseDir="${project.home}/bin">
+			<manifest>
+				<attribute name="Main-Class" value="hps.nyu.fa14.Harmonizer" />
+			</manifest>
+		</jar>
+	</target>
 
 	<property name="zip.name" value="Agonizer" />
-	<target name="package" depends="createjar,createjar_harmonizer">
+	<target name="package" depends="createjar,createjar_harmonizer,package_sample">
 		<echo>Zipping...</echo>
 		<mkdir dir="${dist.dir}" />
 		<zip destfile="${dist.dir}/${zip.name}.zip">
@@ -41,6 +41,16 @@
 			<zipfileset dir="src" includes="**/*.java" prefix="${zip.name}/src" />
 			<!--<zipfileset dir="testsrc" includes="**/*.java" prefix="${zip.name}/testsrc" />-->
 			<zipfileset dir="data" includes="**/*.txt" prefix="${zip.name}/data" />
+		</zip>
+	</target>
+
+	<target name="package_sample" depends="compile">
+		<echo>Zipping...</echo>
+		<mkdir dir="${dist.dir}" />
+		<zip destfile="${dist.dir}/agony_sample.zip">
+			<zipfileset dir="src" includes="**/AgonyUtil.java" prefix="${zip.name}/src" />
+			<zipfileset dir="src" includes="**/Graph.java" prefix="${zip.name}/src" />
+			<zipfileset dir="testsrc" includes="**/AgonyUtilTest.java" prefix="${zip.name}/src" />
 		</zip>
 	</target>
 
